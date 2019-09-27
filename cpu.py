@@ -130,7 +130,7 @@ class CPU(object):
         if value:
             self.status |= flag
         else:
-            self.status &= flag
+            self.status &= ~flag
 
     def read(self, address):
         return self.bus.read(address, False)
@@ -240,6 +240,15 @@ class CPU(object):
         self.fetched = self.accumulator
         return 0
 
+    def rel(self):
+        self.address_relative = self.read(self.program_counter)
+        self.program_counter += 1
+
+        if self.address_relative & 0x80:
+            self.address_relative |= 0xff00
+
+        return 0
+
     # Instructions
     def adc(self):
         self.fetch()
@@ -284,8 +293,33 @@ class CPU(object):
         self.set_flag(self.N, self.accumulator & 0x80)
         return 1
 
+    def sta(self):
+        self.write(self.address_absolute, self.accumulator)
+        return 0
+
     def stx(self):
         self.write(self.address_absolute, self.x)
+        return 0
+
+    def dey(self):
+        self.y -= 1
+
+        self.set_flag(self.Z, self.y == 0x00)
+        self.set_flag(self.N, self.y & 0x80)
+
+        return 0
+
+    def bne(self):
+        if self.get_flag(self.Z) == 0:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + np.int8(self.address_relative)
+
+            if self.address_absolute & 0xff00 and self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
 
     def clc(self):
         self.set_flag(self.C, False)

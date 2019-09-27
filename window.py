@@ -93,6 +93,8 @@ while running:
     screen.blit(font.render("Y: ${:02x}  [{}]".format(nes.cpu.y, nes.cpu.y), True, black), (x, y + 48))
     screen.blit(font.render("Stack P: ${:04x}".format(nes.cpu.stack_pointer), True, black), (x, y + 60))
 
+    screen.blit(font.render('Clocks: {}'.format(nes.cpu.clock_count), True, black), (0, 480))
+
     pg.display.flip()
 
     nes.cpu.clock()
