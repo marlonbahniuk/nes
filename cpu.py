@@ -61,7 +61,7 @@ class CPU(object):
             self.status &= flag
 
     def read(self, address):
-        return self.bus(address, False)
+        return self.bus.read(address, False)
 
     def write(self, address, data):
         self.bus.write(address, data)
