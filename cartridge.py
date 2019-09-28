@@ -1,0 +1,2 @@
+class Cartrige(object):
+    pass

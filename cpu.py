@@ -221,9 +221,40 @@ class CPU(object):
         self.remaining_cycles = 8
 
     # Addressing modes
+    def imp(self):
+        self.fetched = self.accumulator
+        return 0
+
     def imm(self):
         self.address_absolute = self.program_counter
         self.program_counter += 1
+        return 0
+
+    def zp0(self):
+        self.address_absolute = self.read(self.program_counter)
+        self.program_counter += 1
+        self.address_absolute &= 0x00ff
+        return 0
+
+    def zpx(self):
+        self.address_absolute = self.read(self.program_counter) + self.x
+        self.program_counter += 1
+        self.address_absolute &= 0x00ff
+        return 0
+
+    def zpy(self):
+        self.address_absolute = self.read(self.program_counter) + self.y
+        self.program_counter += 1
+        self.address_absolute &= 0x00ff
+        return 0
+
+    def rel(self):
+        self.address_relative = self.read(self.program_counter)
+        self.program_counter += 1
+
+        if self.address_relative & 0x80:
+            self.address_relative |= 0xff00
+
         return 0
 
     def abs(self):
@@ -236,16 +267,68 @@ class CPU(object):
 
         return 0
 
-    def imp(self):
-        self.fetched = self.accumulator
-        return 0
-
-    def rel(self):
-        self.address_relative = self.read(self.program_counter)
+    def abx(self):
+        low_byte = self.read(self.program_counter)
+        self.program_counter += 1
+        high_byte = self.read(self.program_counter)
         self.program_counter += 1
 
-        if self.address_relative & 0x80:
-            self.address_relative |= 0xff00
+        self.address_absolute = (high_byte << 8) | low_byte
+        self.address_absolute += self.x
+
+        if self.address_absolute & 0xff00 != high_byte << 8:
+            return 1
+        else:
+            return 0
+
+    def aby(self):
+        low_byte = self.read(self.program_counter)
+        self.program_counter += 1
+        high_byte = self.read(self.program_counter)
+        self.program_counter += 1
+
+        self.address_absolute = (high_byte << 8) | low_byte
+        self.address_absolute += self.y
+
+        if self.address_absolute & 0xff00 != high_byte << 8:
+            return 1
+        else:
+            return 0
+
+    def ind(self):
+        low_byte = self.read(self.program_counter)
+        self.program_counter += 1
+        high_byte = self.read(self.program_counter)
+        self.program_counter += 1
+
+        address = (high_byte << 8) | low_byte
+
+        if low_byte == 0x00ff:
+            self.address_absolute = (self.read(address & 0xff00) << 8) | self.read(address + 0)
+        else:
+            self.address_absolute = (self.read(address + 1) << 8) | self.read(address +0)
+
+        return 0
+
+    def izx(self):
+        temp = self.read(self.program_counter)
+        self.program_counter += 1
+
+        low_byte = self.read((temp + self.x) & 0x00ff)
+        high_byte = self.read((temp + self.x + 1) & 0x00ff)
+
+        self.address_absolute = (high_byte << 8) | low_byte
+
+        return 0
+
+    def izy(self):
+        temp = self.read(self.program_counter)
+        self.program_counter += 1
+
+        low_byte = self.read((temp + self.y) & 0x00ff)
+        high_byte = self.read((temp + self.y + 1) & 0x00ff)
+
+        self.address_absolute = (high_byte << 8) | low_byte
 
         return 0
 
