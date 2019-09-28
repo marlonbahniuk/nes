@@ -32,23 +32,40 @@ for byte in test_code:
 nes.ram[0xFFFC] = 0x0000
 nes.ram[0xFFFD] = 0x8000
 
-# mapAsm = nes.cpu.disassemble(0x0000, 0xFFFF);
-
 nes.cpu.reset()
 
-# code_map = nes.cpu.disassemble()
+code_map = nes.cpu.disassemble(0x0000, 0xffff)
+
+stepping = True
 
 while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_p:
+                stepping = not stepping
 
+            if stepping and event.key == pg.K_SPACE:
+                complete = False
+
+                while not complete:
+                    nes.cpu.clock()
+
+                    complete = nes.cpu.complete()
+            if event.key == pg.K_r:
+                nes.cpu.reset()
+
+    if not stepping:
+        complete = False
+
+        while not complete:
+            nes.cpu.clock()
+
+            complete = nes.cpu.complete()
 
     screen.fill(white)
-
-    # DrawRam(2, 2, 0x0000, 16, 16);
-    # DrawRam(2, 182, 0x8000, 16, 16);
 
     x, y = 2, 0
     current_address = 0x0000
@@ -76,6 +93,9 @@ while running:
 
     # DrawCode(448, 72, 26);
 
+    if nes.cpu.program_counter in code_map:
+        screen.blit(font.render(code_map[nes.cpu.program_counter], True, black), (500, 200))
+
     x, y = 500, 0
 
     screen.blit(font.render('STATUS:', True, black), (x, y))
@@ -97,8 +117,6 @@ while running:
 
     pg.display.set_caption('NES - {:02.0f} fps'.format(clock.get_fps()))
     pg.display.flip()
-
-    nes.cpu.clock()
 
     clock.tick(60)
 

@@ -123,6 +123,11 @@ class CPU(object):
 
         self.remaining_cycles = 8
 
+        self.clock_count = 0
+
+    def complete(self):
+        return self.remaining_cycles == 0
+
     def get_flag(self, flag):
         return 1 if (self.status & flag) > 0 else 0
 
@@ -407,3 +412,83 @@ class CPU(object):
     def clc(self):
         self.set_flag(self.C, False)
         return 0
+
+    def disassemble(self, start, end):
+        current_address = start
+
+        lines = dict()
+
+        while current_address <= end:
+
+            instruction_address = current_address
+
+            instruction = '${:04x}: '.format(current_address)
+
+            opcode = self.bus.read(current_address, True)
+
+            current_address += 1
+
+            instruction_data = self.lookup[opcode]
+
+            instruction += '{} '.format(instruction_data[0])
+
+            addressing_mode = instruction_data[2]
+
+            if addressing_mode == 'imp':
+                instruction += '{IMP}'
+            elif addressing_mode == 'imm':
+                value = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '#${:02x} {{IMM}}'.format(value)
+            elif addressing_mode == 'zp0':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:02x} {{ZP0}}'.format(low_byte)
+            elif addressing_mode == 'zpx':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:02x} , X {{ZPX}}'.format(low_byte)
+            elif addressing_mode == 'zpy':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:02x} , Y {{ZPY}}'.format(low_byte)
+            elif addressing_mode == 'izx':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '(${:02x}, X) {{IZX}}'.format(low_byte)
+            elif addressing_mode == 'izy':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '(${:02x}, Y) {{IZY}}'.format(low_byte)
+            elif addressing_mode == 'abs':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                high_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:04x} {{ABS}}'.format((high_byte << 8) | low_byte)
+            elif addressing_mode == 'abx':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                high_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:04x}, X {{ABX}}'.format((high_byte << 8) | low_byte)
+            elif addressing_mode == 'aby':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                high_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:04x}, Y {{ABY}}'.format((high_byte << 8) | low_byte)
+            elif addressing_mode == 'ind':
+                low_byte = self.bus.read(current_address, True)
+                current_address += 1
+                high_byte = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '(${:04x}) {{IND}}'.format((high_byte << 8) | low_byte)
+            elif addressing_mode == 'rel':
+                value = self.bus.read(current_address, True)
+                current_address += 1
+                instruction += '${:02x} [${:04x}] {{REL}}'.format(value, current_address + value)
+
+            lines[instruction_address] = instruction
+
+        return lines
