@@ -9,12 +9,16 @@ class Bus(object):
 
         self.ram = [0] * 64 * 1024
 
-    def read(self, address, read_only):
+    def cpu_read(self, address, read_only):
         if 0x0000 <= address <= 0xffff:
             return self.ram[address]
 
         return 0x00
 
-    def write(self, address, data):
+    def cpu_write(self, address, data):
+        if self.cartridge.cpuWrite(address, data)
         if 0x0000 <= address <= 0xffff:
             self.ram[address] = data
+
+    def set_cartridge(self, cartridge):
+        self.cartridge = cartridge

@@ -1,5 +1,6 @@
 import pygame as pg
 from bus import Bus
+from cartridge import Cartridge
 
 pg.init()
 
@@ -21,17 +22,8 @@ black = pg.color.Color('black')
 blue = pg.color.Color('blue')
 green = pg.color.Color('green')
 
-
-test_code = bytes.fromhex('A2 0A 8E 00 00 A2 03 8E 01 00 AC 00 00 A9 00 18 6D 01 00 88 D0 FA 8D 02 00 EA EA EA')
-ram_offset = 0x8000
-
-for byte in test_code:
-    nes.ram[ram_offset] = byte
-    ram_offset += 1
-
-nes.ram[0xFFFC] = 0x0000
-nes.ram[0xFFFD] = 0x8000
-
+cartridge = Cartridge('nestest.nes')
+nes.set_cartridge(cartridge)
 nes.cpu.reset()
 
 code_map = nes.cpu.disassemble(0x0000, 0xffff)
