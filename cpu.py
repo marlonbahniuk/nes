@@ -1,5 +1,8 @@
 import numpy as np
 
+nestest_log = open('nestest.log', 'r')
+
+
 class CPU(object):
     # Flags
     C = 1 << 0  # Carry Bit
@@ -21,14 +24,14 @@ class CPU(object):
         ('???', 'nop', 'imp', 4), ('ORA', 'ora', 'zpx', 4), ('ASL', 'asl', 'zpx', 6), ('???', 'xxx', 'imp', 6),
         ('CLC', 'clc', 'imp', 2), ('ORA', 'ora', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
         ('???', 'nop', 'imp', 4), ('ORA', 'ora', 'abx', 4), ('ASL', 'asl', 'abx', 7), ('???', 'xxx', 'imp', 7),
-        ('JSR', 'jsr', 'abs', 6), ('AND', 'and', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('BIT', 'bit', 'zp0', 3), ('AND', 'and', 'zp0', 3), ('ROL', 'rol', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('PLP', 'plp', 'imp', 4), ('AND', 'and', 'imm', 2), ('ROL', 'rol', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('BIT', 'bit', 'abs', 4), ('AND', 'and', 'abs', 4), ('ROL', 'rol', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BMI', 'bmi', 'rel', 2), ('AND', 'and', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('AND', 'and', 'zpx', 4), ('ROL', 'rol', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('SEC', 'sec', 'imp', 2), ('AND', 'and', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('AND', 'and', 'abx', 4), ('ROL', 'rol', 'abx', 7), ('???', 'xxx', 'imp', 7),
+        ('JSR', 'jsr', 'abs', 6), ('AND', 'and_', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
+        ('BIT', 'bit', 'zp0', 3), ('AND', 'and_', 'zp0', 3), ('ROL', 'rol', 'zp0', 5), ('???', 'xxx', 'imp', 5),
+        ('PLP', 'plp', 'imp', 4), ('AND', 'and_', 'imm', 2), ('ROL', 'rol', 'imp', 2), ('???', 'xxx', 'imp', 2),
+        ('BIT', 'bit', 'abs', 4), ('AND', 'and_', 'abs', 4), ('ROL', 'rol', 'abs', 6), ('???', 'xxx', 'imp', 6),
+        ('BMI', 'bmi', 'rel', 2), ('AND', 'and_', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
+        ('???', 'nop', 'imp', 4), ('AND', 'and_', 'zpx', 4), ('ROL', 'rol', 'zpx', 6), ('???', 'xxx', 'imp', 6),
+        ('SEC', 'sec', 'imp', 2), ('AND', 'and_', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
+        ('???', 'nop', 'imp', 4), ('AND', 'and_', 'abx', 4), ('ROL', 'rol', 'abx', 7), ('???', 'xxx', 'imp', 7),
         ('RTI', 'rti', 'imp', 6), ('EOR', 'eor', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
         ('???', 'nop', 'imp', 3), ('EOR', 'eor', 'zp0', 3), ('LSR', 'lsr', 'zp0', 5), ('???', 'xxx', 'imp', 5),
         ('PHA', 'pha', 'imp', 3), ('EOR', 'eor', 'imm', 2), ('LSR', 'lsr', 'imp', 2), ('???', 'xxx', 'imp', 2),
@@ -114,7 +117,7 @@ class CPU(object):
         self.x = 0
         self.y = 0
         self.stack_pointer = 0xfd
-        self.status = 0x00 | self.U
+        self.status = 0x24
 
         # Helpers
         self.address_relative = 0x0000
@@ -138,16 +141,25 @@ class CPU(object):
             self.status &= ~flag
 
     def read(self, address):
-        return self.bus.read(address, False)
+        return self.bus.cpu_read(address, False)
 
     def write(self, address, data):
-        self.bus.write(address, data)
+        self.bus.cpu_write(address, data)
 
     def clock(self):
         if self.remaining_cycles == 0:
             self.opcode = self.read(self.program_counter)
 
-            self.set_flag(self.U, True)
+            current_pc = self.program_counter
+            current_status = self.status
+            current_sp = self.stack_pointer
+            current_a = self.accumulator
+            current_y = self.y
+            current_x = self.x
+
+            # self.set_flag(self.U, True)
+
+
 
             self.program_counter += 1
 
@@ -163,9 +175,29 @@ class CPU(object):
 
                 cycles += additional_cycle_1 and additional_cycle_2
 
+            else:
+                print('{}, {} not found'.format(instruction_data[1], instruction_data[2]))
+
             self.remaining_cycles = cycles
 
             self.set_flag(self.U, True)
+
+            log_line = nestest_log.readline()
+
+            print('{:04X} {:s}'.format(current_pc, instruction_data[1]))
+
+            log_pc = int(log_line[0:4], 16)
+            log_instruction = log_line[16:19]
+            log_a = int(log_line[50:52], 16)
+            log_x = int(log_line[55:57], 16)
+            log_y = int(log_line[60:62], 16)
+            log_p = int(log_line[65:67], 16)
+            log_sp = int(log_line[71:73], 16)
+#C000  4C F5 C5  JMP $C5F5                       A:00 X:00 Y:00 P:24 SP:FD CYC:  0 SL:241
+
+            if current_a != log_a or current_x != log_x or current_y != log_y or current_pc != log_pc or current_sp != log_sp or current_status != log_p:
+                print('something went wrong')
+
 
         self.clock_count += 1
         self.remaining_cycles -= 1
@@ -311,7 +343,7 @@ class CPU(object):
         if low_byte == 0x00ff:
             self.address_absolute = (self.read(address & 0xff00) << 8) | self.read(address + 0)
         else:
-            self.address_absolute = (self.read(address + 1) << 8) | self.read(address +0)
+            self.address_absolute = (self.read(address + 1) << 8) | self.read(address + 0)
 
         return 0
 
@@ -338,12 +370,19 @@ class CPU(object):
         return 0
 
     # Instructions
+    def and_(self):
+        self.fetch()
+        self.accumulator &= self.fetched
+        self.set_flag(self.Z, self.accumulator == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+        return 1
+
     def adc(self):
         self.fetch()
 
         temp = self.accumulator + self.fetched + self.get_flag(self.C)
 
-        self.set_flag(self.C, temp > 256)
+        self.set_flag(self.C, temp > 255)
 
         self.set_flag(self.Z, (temp & 0x00ff) == 0)
 
@@ -354,6 +393,52 @@ class CPU(object):
         self.accumulator = temp & 0x00ff
 
         return 1
+
+    def sbc(self):
+        self.fetch()
+
+        value = self.fetched ^ 0x00ff
+
+        temp = self.accumulator + value + self.get_flag(self.C)
+
+        self.set_flag(self.C, temp & 0xff00)
+
+        self.set_flag(self.Z, (temp & 0x00ff) == 0)
+
+        self.set_flag(self.V, (temp ^ self.accumulator) & (temp ^ value) & 0x0080)
+
+        self.set_flag(self.N, temp & 0x0080)
+
+        self.accumulator = temp & 0x00ff
+
+        return 1
+
+    def cmp(self):
+        self.fetch()
+
+        temp = self.accumulator - self.fetched
+        self.set_flag(self.C, self.accumulator >= self.fetched)
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
+        return 1
+
+    def cpx(self):
+        self.fetch()
+
+        temp = self.x - self.fetched
+        self.set_flag(self.C, self.x >= self.fetched)
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
+        return 0
+
+    def cpy(self):
+        self.fetch()
+
+        temp = self.y - self.fetched
+        self.set_flag(self.C, self.y >= self.fetched)
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
+        return 0
 
     def ldx(self):
 
@@ -389,12 +474,158 @@ class CPU(object):
         self.write(self.address_absolute, self.x)
         return 0
 
+    def sty(self):
+        self.write(self.address_absolute, self.y)
+        return 0
+
     def dey(self):
-        self.y -= 1
+        self.y = np.uint8(self.y - 1)
 
         self.set_flag(self.Z, self.y == 0x00)
         self.set_flag(self.N, self.y & 0x80)
 
+        return 0
+
+    def dex(self):
+        self.x = np.uint8(self.x - 1)
+        self.set_flag(self.Z, self.x == 0x00)
+        self.set_flag(self.N, self.x & 0x80)
+
+        return 0
+
+    def inc(self):
+        self.fetch()
+        temp = self.fetched + 1
+        self.write(self.address_absolute, temp & 0x00ff)
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
+
+        return 0
+
+    def iny(self):
+        self.y = np.uint8(self.y + 1)
+        self.set_flag(self.Z, self.y & 0x00ff == 0x0000)
+        self.set_flag(self.N, self.y & 0x0080)
+
+        return 0
+
+    def inx(self):
+        self.x = np.uint8(self.x + 1)
+        self.set_flag(self.Z, self.x & 0x00ff == 0x0000)
+        self.set_flag(self.N, self.x & 0x0080)
+
+        return 0
+
+    def tay(self):
+        self.y = self.accumulator
+        self.set_flag(self.Z, self.y & 0x00ff == 0x00)
+        self.set_flag(self.N, self.y & 0x80)
+        return 0
+
+    def tax(self):
+        self.x = self.accumulator
+        self.set_flag(self.Z, self.x & 0x00ff == 0x00)
+        self.set_flag(self.N, self.x & 0x80)
+        return 0
+
+    def tsx(self):
+        self.x = self.stack_pointer
+        self.set_flag(self.Z, self.x & 0x00ff == 0x00)
+        self.set_flag(self.N, self.x & 0x80)
+        return 0
+
+    def tya(self):
+        self.accumulator = self.y
+        self.set_flag(self.Z, self.accumulator & 0x00ff == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+        return 0
+
+    def txa(self):
+        self.accumulator = self.x
+        self.set_flag(self.Z, self.accumulator & 0x00ff == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+        return 0
+
+    def txs(self):
+        self.stack_pointer = self.x
+        return 0
+
+    def rti(self):
+        self.stack_pointer += 1
+        self.status = self.read(0x0100 + self.stack_pointer)
+
+        self.status &= ~self.B
+        self.status &= ~self.U
+
+        self.stack_pointer += 1
+        self.program_counter = self.read(0x0100 + self.stack_pointer)
+        self.stack_pointer += 1
+        self.program_counter |= self.read(0x0100 + self.stack_pointer) << 8
+        return 0
+
+    def lsr(self):
+        self.fetch()
+        self.set_flag(self.C, self.fetched & 0x0001)
+        temp = self.fetched >> 1
+
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
+
+        if self.lookup[self.opcode][2] == 'imp':
+            self.accumulator = temp & 0x00ff
+        else:
+            self.write(self.address_absolute, temp & 0x00ff)
+
+        return 0
+
+    def asl(self):
+        self.fetch()
+        temp = self.fetched << 1
+        self.set_flag(self.C, temp & 0xff00 > 0)
+        self.set_flag(self.Z, temp & 0x00ff == 0x00)
+        self.set_flag(self.N, temp & 0x80)
+
+        if self.lookup[self.opcode][2] == 'imp':
+            self.accumulator = temp & 0x00ff
+        else:
+            self.write(self.address_absolute, temp & 0x00ff)
+
+        return 0
+
+    def ror(self):
+        self.fetch()
+        temp = (self.get_flag(self.C) << 7) | (self.fetched >> 1)
+        self.set_flag(self.C, self.fetched & 0x01)
+        self.set_flag(self.Z, temp & 0x00ff == 0x00)
+        self.set_flag(self.N, temp & 0x80)
+
+        if self.lookup[self.opcode][2] == 'imp':
+            self.accumulator = temp & 0x00ff
+        else:
+            self.write(self.address_absolute, temp & 0x00ff)
+
+        return 0
+
+    def rol(self):
+        self.fetch()
+        temp = (self.fetched << 1) | self.get_flag(self.C)
+        self.set_flag(self.C, temp & 0xff00)
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
+
+        if self.lookup[self.opcode][2] == 'imp':
+            self.accumulator = temp & 0x00ff
+        else:
+            self.write(self.address_absolute, temp & 0x00ff)
+
+        return 0
+
+    def dec(self):
+        self.fetch()
+        temp = self.fetched - 1
+        self.write(self.address_absolute, temp & 0x00FF)
+        self.set_flag(self.Z, (temp & 0x00FF) == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
         return 0
 
     def bne(self):
@@ -409,8 +640,215 @@ class CPU(object):
 
         return 0
 
+    def jmp(self):
+        self.program_counter = self.address_absolute
+        return 0
+
+    def jsr(self):
+        self.program_counter -= 1
+
+        self.write(0x0100 + self.stack_pointer, (self.program_counter >> 8) & 0x00ff)
+        self.stack_pointer -= 1
+        self.write(0x0100 + self.stack_pointer, self.program_counter & 0x00ff)
+        self.stack_pointer -= 1
+
+        self.program_counter = self.address_absolute
+
+        return 0
+
+    def bcs(self):
+        if self.get_flag(self.C) == 1:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def bcc(self):
+        if self.get_flag(self.C) == 0:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def beq(self):
+        if self.get_flag(self.Z) == 1:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def bmi(self):
+        if self.get_flag(self.N) == 1:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def bvc(self):
+        if self.get_flag(self.V) == 0:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def bvs(self):
+        if self.get_flag(self.V) == 1:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def bpl(self):
+        if self.get_flag(self.N) == 0:
+            self.remaining_cycles += 1
+            self.address_absolute = self.program_counter + self.address_relative
+
+            if self.address_absolute & 0xff00 != self.program_counter & 0xff00:
+                self.remaining_cycles += 1
+
+            self.program_counter = self.address_absolute
+
+        return 0
+
+    def rts(self):
+        self.stack_pointer += 1
+        self.program_counter = self.read(0x0100 + self.stack_pointer)
+        self.stack_pointer += 1
+        self.program_counter |= self.read(0x0100 + self.stack_pointer) << 8
+
+        self.program_counter += 1
+        return 0
+
+    def bit(self):
+        self.fetch()
+
+        temp = self.accumulator & self.fetched
+        self.set_flag(self.Z, temp & 0x00ff == 0x00)
+        self.set_flag(self.N, self.fetched & (1 << 7))
+        self.set_flag(self.V, self.fetched & (1 << 6))
+        return 0
+
+    def eor(self):
+        self.fetch()
+
+        self.accumulator ^= self.fetched
+        self.set_flag(self.Z, self.accumulator == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+        return 1
+
+    def ora(self):
+        self.fetch()
+
+        self.accumulator |= self.fetched
+        self.set_flag(self.Z, self.accumulator == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+
+    def sec(self):
+        self.set_flag(self.C, True)
+        return 0
+
     def clc(self):
         self.set_flag(self.C, False)
+        return 0
+
+    def sei(self):
+        self.set_flag(self.I, True)
+        return 0
+
+    def sed(self):
+        self.set_flag(self.D, True)
+        return 0
+
+    def cld(self):
+        self.set_flag(self.D, False)
+        return 0
+
+    def clv(self):
+        self.set_flag(self.V, False)
+        return 0
+
+    def brk(self):
+        self.program_counter += 1
+        self.set_flag(self.I, True)
+        self.write(0x0100 + self.stack_pointer, (self.program_counter >> 8) & 0x00ff)
+        self.stack_pointer -= 1
+        self.write(0x0100 + self.stack_pointer, self.program_counter & 0x00ff)
+        self.stack_pointer -= 1
+
+        self.set_flag(self.B, True)
+        self.write(0x0100 + self.stack_pointer, self.status)
+        self.stack_pointer -= 1
+        self.set_flag(self.B, False)
+
+        self.program_counter = self.read(0xfffe) | (self.read(0xffff) << 8)
+        return 0
+
+    def pha(self):
+        self.write(0x0100 + self.stack_pointer, self.accumulator)
+
+        self.stack_pointer -= 1
+        return 0
+
+    def php(self):
+        self.set_flag(self.B, True)
+        self.set_flag(self.U, True)
+        self.write(0x0100 + self.stack_pointer, self.status)
+
+        self.set_flag(self.B, False)
+        self.set_flag(self.U, False)
+
+        self.stack_pointer -= 1
+        return 0
+
+    def pla(self):
+        self.stack_pointer += 1
+        self.accumulator = self.read(0x0100 + self.stack_pointer)
+        self.set_flag(self.Z, self.accumulator == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+        return 0
+
+    def plp(self):
+        self.stack_pointer += 1
+        self.status = self.read(0x0100 + self.stack_pointer)
+        self.set_flag(self.B, False)
+        return 0
+
+    def nop(self):
+        if self.opcode == 0xFC:
+            return 1
+        return 0
+
+    def xxx(self):
         return 0
 
     def disassemble(self, start, end):
@@ -424,7 +862,7 @@ class CPU(object):
 
             instruction = '${:04x}: '.format(current_address)
 
-            opcode = self.bus.read(current_address, True)
+            opcode = self.bus.cpu_read(current_address, True)
 
             current_address += 1
 
@@ -437,55 +875,55 @@ class CPU(object):
             if addressing_mode == 'imp':
                 instruction += '{IMP}'
             elif addressing_mode == 'imm':
-                value = self.bus.read(current_address, True)
+                value = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '#${:02x} {{IMM}}'.format(value)
             elif addressing_mode == 'zp0':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:02x} {{ZP0}}'.format(low_byte)
             elif addressing_mode == 'zpx':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:02x} , X {{ZPX}}'.format(low_byte)
             elif addressing_mode == 'zpy':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:02x} , Y {{ZPY}}'.format(low_byte)
             elif addressing_mode == 'izx':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '(${:02x}, X) {{IZX}}'.format(low_byte)
             elif addressing_mode == 'izy':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '(${:02x}, Y) {{IZY}}'.format(low_byte)
             elif addressing_mode == 'abs':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
-                high_byte = self.bus.read(current_address, True)
+                high_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:04x} {{ABS}}'.format((high_byte << 8) | low_byte)
             elif addressing_mode == 'abx':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
-                high_byte = self.bus.read(current_address, True)
+                high_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:04x}, X {{ABX}}'.format((high_byte << 8) | low_byte)
             elif addressing_mode == 'aby':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
-                high_byte = self.bus.read(current_address, True)
+                high_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:04x}, Y {{ABY}}'.format((high_byte << 8) | low_byte)
             elif addressing_mode == 'ind':
-                low_byte = self.bus.read(current_address, True)
+                low_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
-                high_byte = self.bus.read(current_address, True)
+                high_byte = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '(${:04x}) {{IND}}'.format((high_byte << 8) | low_byte)
             elif addressing_mode == 'rel':
-                value = self.bus.read(current_address, True)
+                value = self.bus.cpu_read(current_address, True)
                 current_address += 1
                 instruction += '${:02x} [${:04x}] {{REL}}'.format(value, current_address + value)
 

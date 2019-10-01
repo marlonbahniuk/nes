@@ -30,10 +30,20 @@ class Cartridge(object):
 
             self.chr_data = file_data.read(self.chr_banks * 8192)
 
-            self.mapper = mapper_selector.select(self.mapper_id)
+            mapper_class = mapper_selector.select(self.mapper_id)
 
-    def cpu_read(self, address, data):
-        pass
+            self.mapper = mapper_class(self.prg_banks, self.chr_banks)
+
+    def cpu_read(self, address):
+        new_address, should_map = self.mapper.cpu_map_read(address)
+
+        data = 0x00
+
+        if should_map:
+            data = self.prg_data[new_address]
+            return True, data
+        else:
+            return False, data
 
     def cpu_write(self, address, data):
         pass

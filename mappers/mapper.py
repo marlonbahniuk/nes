@@ -4,14 +4,14 @@ class Mapper(object):
         self.prg_banks = prg_banks
         self.chr_banks = chr_banks
 
-    def cpuMapRead(self, address):
+    def cpu_map_read(self, address):
         pass
 
-    def cpuMapWrite(self, address):
+    def cpu_map_write(self, address):
         pass
 
-    def ppuMapRead(self, address):
+    def ppu_map_read(self, address):
         pass
 
-    def ppuMapWrite(self, address):
+    def ppu_map_write(self, address):
         pass

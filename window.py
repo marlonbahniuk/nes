@@ -1,4 +1,5 @@
 import pygame as pg
+
 from bus import Bus
 from cartridge import Cartridge
 
@@ -21,14 +22,17 @@ white = pg.color.Color('white')
 black = pg.color.Color('black')
 blue = pg.color.Color('blue')
 green = pg.color.Color('green')
+gray = pg.color.Color('gray')
 
 cartridge = Cartridge('nestest.nes')
 nes.set_cartridge(cartridge)
 nes.cpu.reset()
 
+nes.cpu.program_counter = 0x0c000
+
 code_map = nes.cpu.disassemble(0x0000, 0xffff)
 
-stepping = True
+stepping = False
 
 while running:
     for event in pg.event.get():
@@ -36,6 +40,7 @@ while running:
             running = False
 
         if event.type == pg.KEYDOWN:
+
             if event.key == pg.K_p:
                 stepping = not stepping
 
@@ -64,7 +69,7 @@ while running:
     for row in range(16):
         row_text = '${:04x}:'.format(current_address)
         for column in range(16):
-            row_text += ' {:02x}'.format(nes.read(current_address, True))
+            row_text += ' {:02x}'.format(nes.cpu_read(current_address, True))
             current_address += 1
 
         screen.blit(font.render(row_text, True, black), (x, y))
@@ -76,7 +81,7 @@ while running:
     for row in range(16):
         row_text = '${:04x}:'.format(current_address)
         for column in range(16):
-            row_text += ' {:02x}'.format(nes.read(current_address, True))
+            row_text += ' {:02x}'.format(nes.cpu_read(current_address, True))
             current_address += 1
 
         screen.blit(font.render(row_text, True, black), (x, y))
@@ -85,8 +90,24 @@ while running:
 
     # DrawCode(448, 72, 26);
 
-    if nes.cpu.program_counter in code_map:
-        screen.blit(font.render(code_map[nes.cpu.program_counter], True, black), (500, 200))
+    keys_list = sorted(code_map.keys())
+
+    if nes.cpu.program_counter in keys_list:
+        current_index = keys_list.index(nes.cpu.program_counter)
+
+        lower_index = current_index - 5
+
+        upper_index = current_index + 6
+
+        x, y = 500, 200
+
+        for index in range(lower_index, upper_index):
+            color = black if index == current_index else gray
+
+            if index >= 0:
+                screen.blit(font.render(code_map[keys_list[index]], True, color), (x, y))
+
+            y += 12
 
     x, y = 500, 0
 
@@ -100,7 +121,8 @@ while running:
     screen.blit(font.render('Z', True, green if nes.cpu.status & nes.cpu.Z else red), (x + 160, y))
     screen.blit(font.render('C', True, green if nes.cpu.status & nes.cpu.C else red), (x + 176, y))
     screen.blit(font.render('PC: ${:04x}'.format(nes.cpu.program_counter), True, black), (x, y + 12))
-    screen.blit(font.render('A: ${:02x}  [{}]'.format(nes.cpu.accumulator, nes.cpu.accumulator), True, black), (x, y + 24))
+    screen.blit(font.render('A: ${:02x}  [{}]'.format(nes.cpu.accumulator, nes.cpu.accumulator), True, black),
+                (x, y + 24))
     screen.blit(font.render('X: ${:02x}  [{}]'.format(nes.cpu.x, nes.cpu.x), True, black), (x, y + 36))
     screen.blit(font.render('Y: ${:02x}  [{}]'.format(nes.cpu.y, nes.cpu.y), True, black), (x, y + 48))
     screen.blit(font.render('Stack P: ${:04x}'.format(nes.cpu.stack_pointer), True, black), (x, y + 60))
@@ -110,6 +132,8 @@ while running:
     pg.display.set_caption('NES - {:02.0f} fps'.format(clock.get_fps()))
     pg.display.flip()
 
-    clock.tick(60)
+    nes.ppu.get_screen()
+
+    clock.tick()
 
 pg.quit()
