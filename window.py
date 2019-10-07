@@ -3,6 +3,12 @@ import pygame as pg
 from bus import Bus
 from cartridge import Cartridge
 
+nes = Bus()
+
+cartridge = Cartridge('nestest.nes')
+nes.set_cartridge(cartridge)
+nes.cpu.reset()
+
 pg.init()
 
 size = (700, 500)
@@ -13,8 +19,6 @@ running = True
 
 clock = pg.time.Clock()
 
-nes = Bus()
-
 font = pg.font.SysFont('Courier', 12)
 
 red = pg.color.Color('red')
@@ -23,12 +27,6 @@ black = pg.color.Color('black')
 blue = pg.color.Color('blue')
 green = pg.color.Color('green')
 gray = pg.color.Color('gray')
-
-cartridge = Cartridge('donkey kong.nes')
-nes.set_cartridge(cartridge)
-nes.cpu.reset()
-
-# nes.cpu.program_counter = 0x0c000
 
 code_map = nes.cpu.disassemble(0x0000, 0xffff)
 

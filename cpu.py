@@ -16,70 +16,70 @@ class CPU(object):
 
     # Instructions lookup table
     lookup = (
-        ('BRK', 'brk', 'imm', 7), ('ORA', 'ora', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 3), ('ORA', 'ora', 'zp0', 3), ('ASL', 'asl', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('PHP', 'php', 'imp', 3), ('ORA', 'ora', 'imm', 2), ('ASL', 'asl', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('???', 'nop', 'imp', 4), ('ORA', 'ora', 'abs', 4), ('ASL', 'asl', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BPL', 'bpl', 'rel', 2), ('ORA', 'ora', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('ORA', 'ora', 'zpx', 4), ('ASL', 'asl', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('CLC', 'clc', 'imp', 2), ('ORA', 'ora', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('ORA', 'ora', 'abx', 4), ('ASL', 'asl', 'abx', 7), ('???', 'xxx', 'imp', 7),
-        ('JSR', 'jsr', 'abs', 6), ('AND', 'and_', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('BIT', 'bit', 'zp0', 3), ('AND', 'and_', 'zp0', 3), ('ROL', 'rol', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('PLP', 'plp', 'imp', 4), ('AND', 'and_', 'imm', 2), ('ROL', 'rol', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('BIT', 'bit', 'abs', 4), ('AND', 'and_', 'abs', 4), ('ROL', 'rol', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BMI', 'bmi', 'rel', 2), ('AND', 'and_', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('AND', 'and_', 'zpx', 4), ('ROL', 'rol', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('SEC', 'sec', 'imp', 2), ('AND', 'and_', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('AND', 'and_', 'abx', 4), ('ROL', 'rol', 'abx', 7), ('???', 'xxx', 'imp', 7),
-        ('RTI', 'rti', 'imp', 6), ('EOR', 'eor', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 3), ('EOR', 'eor', 'zp0', 3), ('LSR', 'lsr', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('PHA', 'pha', 'imp', 3), ('EOR', 'eor', 'imm', 2), ('LSR', 'lsr', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('JMP', 'jmp', 'abs', 3), ('EOR', 'eor', 'abs', 4), ('LSR', 'lsr', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BVC', 'bvc', 'rel', 2), ('EOR', 'eor', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('EOR', 'eor', 'zpx', 4), ('LSR', 'lsr', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('CLI', 'cli', 'imp', 2), ('EOR', 'eor', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('EOR', 'eor', 'abx', 4), ('LSR', 'lsr', 'abx', 7), ('???', 'xxx', 'imp', 7),
-        ('RTS', 'rts', 'imp', 6), ('ADC', 'adc', 'izx', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 3), ('ADC', 'adc', 'zp0', 3), ('ROR', 'ror', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('PLA', 'pla', 'imp', 4), ('ADC', 'adc', 'imm', 2), ('ROR', 'ror', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('JMP', 'jmp', 'ind', 5), ('ADC', 'adc', 'abs', 4), ('ROR', 'ror', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BVS', 'bvs', 'rel', 2), ('ADC', 'adc', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('ADC', 'adc', 'zpx', 4), ('ROR', 'ror', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('SEI', 'sei', 'imp', 2), ('ADC', 'adc', 'aby', 4), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('ADC', 'adc', 'abx', 4), ('ROR', 'ror', 'abx', 7), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 2), ('STA', 'sta', 'izx', 6), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 6),
-        ('STY', 'sty', 'zp0', 3), ('STA', 'sta', 'zp0', 3), ('STX', 'stx', 'zp0', 3), ('???', 'xxx', 'imp', 3),
-        ('DEY', 'dey', 'imp', 2), ('???', 'nop', 'imp', 2), ('TXA', 'txa', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('STY', 'sty', 'abs', 4), ('STA', 'sta', 'abs', 4), ('STX', 'stx', 'abs', 4), ('???', 'xxx', 'imp', 4),
-        ('BCC', 'bcc', 'rel', 2), ('STA', 'sta', 'izy', 6), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 6),
-        ('STY', 'sty', 'zpx', 4), ('STA', 'sta', 'zpx', 4), ('STX', 'stx', 'zpy', 4), ('???', 'xxx', 'imp', 4),
-        ('TYA', 'tya', 'imp', 2), ('STA', 'sta', 'aby', 5), ('TXS', 'txs', 'imp', 2), ('???', 'xxx', 'imp', 5),
-        ('???', 'nop', 'imp', 5), ('STA', 'sta', 'abx', 5), ('???', 'xxx', 'imp', 5), ('???', 'xxx', 'imp', 5),
-        ('LDY', 'ldy', 'imm', 2), ('LDA', 'lda', 'izx', 6), ('LDX', 'ldx', 'imm', 2), ('???', 'xxx', 'imp', 6),
-        ('LDY', 'ldy', 'zp0', 3), ('LDA', 'lda', 'zp0', 3), ('LDX', 'ldx', 'zp0', 3), ('???', 'xxx', 'imp', 3),
-        ('TAY', 'tay', 'imp', 2), ('LDA', 'lda', 'imm', 2), ('TAX', 'tax', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('LDY', 'ldy', 'abs', 4), ('LDA', 'lda', 'abs', 4), ('LDX', 'ldx', 'abs', 4), ('???', 'xxx', 'imp', 4),
-        ('BCS', 'bcs', 'rel', 2), ('LDA', 'lda', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 5),
-        ('LDY', 'ldy', 'zpx', 4), ('LDA', 'lda', 'zpx', 4), ('LDX', 'ldx', 'zpy', 4), ('???', 'xxx', 'imp', 4),
-        ('CLV', 'clv', 'imp', 2), ('LDA', 'lda', 'aby', 4), ('TSX', 'tsx', 'imp', 2), ('???', 'xxx', 'imp', 4),
-        ('LDY', 'ldy', 'abx', 4), ('LDA', 'lda', 'abx', 4), ('LDX', 'ldx', 'aby', 4), ('???', 'xxx', 'imp', 4),
-        ('CPY', 'cpy', 'imm', 2), ('CMP', 'cmp', 'izx', 6), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('CPY', 'cpy', 'zp0', 3), ('CMP', 'cmp', 'zp0', 3), ('DEC', 'dec', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('INY', 'iny', 'imp', 2), ('CMP', 'cmp', 'imm', 2), ('DEX', 'dex', 'imp', 2), ('???', 'xxx', 'imp', 2),
-        ('CPY', 'cpy', 'abs', 4), ('CMP', 'cmp', 'abs', 4), ('DEC', 'dec', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BNE', 'bne', 'rel', 2), ('CMP', 'cmp', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('CMP', 'cmp', 'zpx', 4), ('DEC', 'dec', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('CLD', 'cld', 'imp', 2), ('CMP', 'cmp', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('CMP', 'cmp', 'abx', 4), ('DEC', 'dec', 'abx', 7), ('???', 'xxx', 'imp', 7),
-        ('CPX', 'cpx', 'imm', 2), ('SBC', 'sbc', 'izx', 6), ('???', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('CPX', 'cpx', 'zp0', 3), ('SBC', 'sbc', 'zp0', 3), ('INC', 'inc', 'zp0', 5), ('???', 'xxx', 'imp', 5),
-        ('INX', 'inx', 'imp', 2), ('SBC', 'sbc', 'imm', 2), ('NOP', 'nop', 'imp', 2), ('???', 'sbc', 'imp', 2),
-        ('CPX', 'cpx', 'abs', 4), ('SBC', 'sbc', 'abs', 4), ('INC', 'inc', 'abs', 6), ('???', 'xxx', 'imp', 6),
-        ('BEQ', 'beq', 'rel', 2), ('SBC', 'sbc', 'izy', 5), ('???', 'xxx', 'imp', 2), ('???', 'xxx', 'imp', 8),
-        ('???', 'nop', 'imp', 4), ('SBC', 'sbc', 'zpx', 4), ('INC', 'inc', 'zpx', 6), ('???', 'xxx', 'imp', 6),
-        ('SED', 'sed', 'imp', 2), ('SBC', 'sbc', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???', 'xxx', 'imp', 7),
-        ('???', 'nop', 'imp', 4), ('SBC', 'sbc', 'abx', 4), ('INC', 'inc', 'abx', 7), ('???', 'xxx', 'imp', 7),
+        ('BRK', 'brk', 'imm', 7), ('ORA', 'ora', 'izx', 6), ('???0', 'xxx', 'imp', 2), ('???1', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 3), ('ORA', 'ora', 'zp0', 3), ('ASL', 'asl', 'zp0', 5), ('???2', 'xxx', 'imp', 5),
+        ('PHP', 'php', 'imp', 3), ('ORA', 'ora', 'imm', 2), ('ASL', 'asl', 'imp', 2), ('???3', 'xxx', 'imp', 2),
+        ('NOP', 'nop', 'imp', 4), ('ORA', 'ora', 'abs', 4), ('ASL', 'asl', 'abs', 6), ('???4', 'xxx', 'imp', 6),
+        ('BPL', 'bpl', 'rel', 2), ('ORA', 'ora', 'izy', 5), ('???5', 'xxx', 'imp', 2), ('???6', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 4), ('ORA', 'ora', 'zpx', 4), ('ASL', 'asl', 'zpx', 6), ('???7', 'xxx', 'imp', 6),
+        ('CLC', 'clc', 'imp', 2), ('ORA', 'ora', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???8', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 4), ('ORA', 'ora', 'abx', 4), ('ASL', 'asl', 'abx', 7), ('???9', 'xxx', 'imp', 7),
+        ('JSR', 'jsr', 'abs', 6), ('AND', 'and_', 'izx', 6), ('???10', 'xxx', 'imp', 2), ('???11', 'xxx', 'imp', 8),
+        ('BIT', 'bit', 'zp0', 3), ('AND', 'and_', 'zp0', 3), ('ROL', 'rol', 'zp0', 5), ('???12', 'xxx', 'imp', 5),
+        ('PLP', 'plp', 'imp', 4), ('AND', 'and_', 'imm', 2), ('ROL', 'rol', 'imp', 2), ('???13', 'xxx', 'imp', 2),
+        ('BIT', 'bit', 'abs', 4), ('AND', 'and_', 'abs', 4), ('ROL', 'rol', 'abs', 6), ('???14', 'xxx', 'imp', 6),
+        ('BMI', 'bmi', 'rel', 2), ('AND', 'and_', 'izy', 5), ('???15', 'xxx', 'imp', 2), ('???16', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 4), ('AND', 'and_', 'zpx', 4), ('ROL', 'rol', 'zpx', 6), ('???17', 'xxx', 'imp', 6),
+        ('SEC', 'sec', 'imp', 2), ('AND', 'and_', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???18', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 4), ('AND', 'and_', 'abx', 4), ('ROL', 'rol', 'abx', 7), ('???19', 'xxx', 'imp', 7),
+        ('RTI', 'rti', 'imp', 6), ('EOR', 'eor', 'izx', 6), ('???20', 'xxx', 'imp', 2), ('???21', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 3), ('EOR', 'eor', 'zp0', 3), ('LSR', 'lsr', 'zp0', 5), ('???22', 'xxx', 'imp', 5),
+        ('PHA', 'pha', 'imp', 3), ('EOR', 'eor', 'imm', 2), ('LSR', 'lsr', 'imp', 2), ('???23', 'xxx', 'imp', 2),
+        ('JMP', 'jmp', 'abs', 3), ('EOR', 'eor', 'abs', 4), ('LSR', 'lsr', 'abs', 6), ('???24', 'xxx', 'imp', 6),
+        ('BVC', 'bvc', 'rel', 2), ('EOR', 'eor', 'izy', 5), ('???25', 'xxx', 'imp', 2), ('???26', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 4), ('EOR', 'eor', 'zpx', 4), ('LSR', 'lsr', 'zpx', 6), ('???27', 'xxx', 'imp', 6),
+        ('CLI', 'cli', 'imp', 2), ('EOR', 'eor', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???28', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 4), ('EOR', 'eor', 'abx', 4), ('LSR', 'lsr', 'abx', 7), ('???29', 'xxx', 'imp', 7),
+        ('RTS', 'rts', 'imp', 6), ('ADC', 'adc', 'izx', 6), ('???30', 'xxx', 'imp', 2), ('???31', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 3), ('ADC', 'adc', 'zp0', 3), ('ROR', 'ror', 'zp0', 5), ('???32', 'xxx', 'imp', 5),
+        ('PLA', 'pla', 'imp', 4), ('ADC', 'adc', 'imm', 2), ('ROR', 'ror', 'imp', 2), ('???33', 'xxx', 'imp', 2),
+        ('JMP', 'jmp', 'ind', 5), ('ADC', 'adc', 'abs', 4), ('ROR', 'ror', 'abs', 6), ('???34', 'xxx', 'imp', 6),
+        ('BVS', 'bvs', 'rel', 2), ('ADC', 'adc', 'izy', 5), ('???35', 'xxx', 'imp', 2), ('???36', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 4), ('ADC', 'adc', 'zpx', 4), ('ROR', 'ror', 'zpx', 6), ('???37', 'xxx', 'imp', 6),
+        ('SEI', 'sei', 'imp', 2), ('ADC', 'adc', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???38', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 4), ('ADC', 'adc', 'abx', 4), ('ROR', 'ror', 'abx', 7), ('???39', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 2), ('STA', 'sta', 'izx', 6), ('NOP', 'nop', 'imp', 2), ('SAX', 'sax', 'izx', 6),
+        ('STY', 'sty', 'zp0', 3), ('STA', 'sta', 'zp0', 3), ('STX', 'stx', 'zp0', 3), ('SAX', 'sax', 'zp0', 3),
+        ('DEY', 'dey', 'imp', 2), ('NOP', 'nop', 'imp', 2), ('TXA', 'txa', 'imp', 2), ('???42', 'xxx', 'imp', 2),
+        ('STY', 'sty', 'abs', 4), ('STA', 'sta', 'abs', 4), ('STX', 'stx', 'abs', 4), ('SAX', 'sax', 'abs', 4),
+        ('BCC', 'bcc', 'rel', 2), ('STA', 'sta', 'izy', 6), ('???44', 'xxx', 'imp', 2), ('???45', 'xxx', 'imp', 6),
+        ('STY', 'sty', 'zpx', 4), ('STA', 'sta', 'zpx', 4), ('STX', 'stx', 'zpy', 4), ('SAX', 'sax', 'zpy', 4),
+        ('TYA', 'tya', 'imp', 2), ('STA', 'sta', 'aby', 5), ('TXS', 'txs', 'imp', 2), ('???47', 'xxx', 'imp', 5),
+        ('NOP', 'nop', 'imp', 5), ('STA', 'sta', 'abx', 5), ('???48', 'xxx', 'imp', 5), ('???49', 'xxx', 'imp', 5),
+        ('LDY', 'ldy', 'imm', 2), ('LDA', 'lda', 'izx', 6), ('LDX', 'ldx', 'imm', 2), ('LAX', 'lax', 'izx', 6),
+        ('LDY', 'ldy', 'zp0', 3), ('LDA', 'lda', 'zp0', 3), ('LDX', 'ldx', 'zp0', 3), ('LAX', 'lax', 'zp0', 3),
+        ('TAY', 'tay', 'imp', 2), ('LDA', 'lda', 'imm', 2), ('TAX', 'tax', 'imp', 2), ('???50', 'xxx', 'imp', 2),
+        ('LDY', 'ldy', 'abs', 4), ('LDA', 'lda', 'abs', 4), ('LDX', 'ldx', 'abs', 4), ('LAX', 'lax', 'abs', 4),
+        ('BCS', 'bcs', 'rel', 2), ('LDA', 'lda', 'izy', 5), ('???52', 'xxx', 'imp', 2), ('LAX', 'lax', 'izy', 5),
+        ('LDY', 'ldy', 'zpx', 4), ('LDA', 'lda', 'zpx', 4), ('LDX', 'ldx', 'zpy', 4), ('LAX', 'lax', 'zpy', 4),
+        ('CLV', 'clv', 'imp', 2), ('LDA', 'lda', 'aby', 4), ('TSX', 'tsx', 'imp', 2), ('???55', 'xxx', 'imp', 4),
+        ('LDY', 'ldy', 'abx', 4), ('LDA', 'lda', 'abx', 4), ('LDX', 'ldx', 'aby', 4), ('LAX', 'lax', 'aby', 4),
+        ('CPY', 'cpy', 'imm', 2), ('CMP', 'cmp', 'izx', 6), ('NOP', 'nop', 'imp', 2), ('DCP', 'dcp', 'izx', 8),
+        ('CPY', 'cpy', 'zp0', 3), ('CMP', 'cmp', 'zp0', 3), ('DEC', 'dec', 'zp0', 5), ('DCP', 'dcp', 'zp0', 5),
+        ('INY', 'iny', 'imp', 2), ('CMP', 'cmp', 'imm', 2), ('DEX', 'dex', 'imp', 2), ('???59', 'xxx', 'imp', 2),
+        ('CPY', 'cpy', 'abs', 4), ('CMP', 'cmp', 'abs', 4), ('DEC', 'dec', 'abs', 6), ('DCP', 'dcp', 'abs', 6),
+        ('BNE', 'bne', 'rel', 2), ('CMP', 'cmp', 'izy', 5), ('???61', 'xxx', 'imp', 2), ('DCP', 'dcp', 'izy', 8),
+        ('NOP', 'nop', 'imp', 4), ('CMP', 'cmp', 'zpx', 4), ('DEC', 'dec', 'zpx', 6), ('DCP', 'dcp', 'zpy', 6),
+        ('CLD', 'cld', 'imp', 2), ('CMP', 'cmp', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???64', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 4), ('CMP', 'cmp', 'abx', 4), ('DEC', 'dec', 'abx', 7), ('???65', 'xxx', 'imp', 7),
+        ('CPX', 'cpx', 'imm', 2), ('SBC', 'sbc', 'izx', 6), ('NOP', 'nop', 'imp', 2), ('???66', 'xxx', 'imp', 8),
+        ('CPX', 'cpx', 'zp0', 3), ('SBC', 'sbc', 'zp0', 3), ('INC', 'inc', 'zp0', 5), ('???67', 'xxx', 'imp', 5),
+        ('INX', 'inx', 'imp', 2), ('SBC', 'sbc', 'imm', 2), ('NOP', 'nop', 'imp', 2), ('SBC', 'sbc', 'imm', 2),
+        ('CPX', 'cpx', 'abs', 4), ('SBC', 'sbc', 'abs', 4), ('INC', 'inc', 'abs', 6), ('???69', 'xxx', 'imp', 6),
+        ('BEQ', 'beq', 'rel', 2), ('SBC', 'sbc', 'izy', 5), ('???70', 'xxx', 'imp', 2), ('???71', 'xxx', 'imp', 8),
+        ('NOP', 'nop', 'imp', 4), ('SBC', 'sbc', 'zpx', 4), ('INC', 'inc', 'zpx', 6), ('???72', 'xxx', 'imp', 6),
+        ('SED', 'sed', 'imp', 2), ('SBC', 'sbc', 'aby', 4), ('NOP', 'nop', 'imp', 2), ('???73', 'xxx', 'imp', 7),
+        ('NOP', 'nop', 'imp', 4), ('SBC', 'sbc', 'abx', 4), ('INC', 'inc', 'abx', 7), ('???74', 'xxx', 'imp', 7),
     )
 
     def __init__(self):
@@ -141,7 +141,7 @@ class CPU(object):
             self.status &= ~flag
 
     def read(self, address):
-        return self.bus.cpu_read(address, False)
+         return self.bus.cpu_read(address, False)
 
     def write(self, address, data):
         self.bus.cpu_write(address, data)
@@ -157,10 +157,6 @@ class CPU(object):
             current_y = self.y
             current_x = self.x
 
-            # self.set_flag(self.U, True)
-
-
-
             self.program_counter += 1
 
             instruction_data = self.lookup[self.opcode]
@@ -173,7 +169,7 @@ class CPU(object):
                 additional_cycle_1 = addressing_mode()
                 additional_cycle_2 = instruction()
 
-                cycles += additional_cycle_1 and additional_cycle_2
+                cycles += 1 if additional_cycle_1 and additional_cycle_2 else 0
 
             else:
                 print('{}, {} not found'.format(instruction_data[1], instruction_data[2]))
@@ -183,8 +179,7 @@ class CPU(object):
             self.set_flag(self.U, True)
 
             # log_line = nestest_log.readline()
-
-            print('{:04X} {:s}'.format(current_pc, instruction_data[1]))
+            print('{:04X} {:02X} {:s} {:s} {:s}'.format(current_pc, self.opcode, instruction_data[0], instruction_data[1], instruction_data[2]))
 
             # log_pc = int(log_line[0:4], 16)
             # log_instruction = log_line[16:19]
@@ -325,7 +320,7 @@ class CPU(object):
         self.program_counter += 1
 
         self.address_absolute = (high_byte << 8) | low_byte
-        self.address_absolute += self.y
+        self.address_absolute = np.int16(self.address_absolute + self.y)
 
         if self.address_absolute & 0xff00 != high_byte << 8:
             return 1
@@ -362,12 +357,16 @@ class CPU(object):
         temp = self.read(self.program_counter)
         self.program_counter += 1
 
-        low_byte = self.read((temp + self.y) & 0x00ff)
-        high_byte = self.read((temp + self.y + 1) & 0x00ff)
+        low_byte = self.read(temp & 0x00ff)
+        high_byte = self.read((temp + 1) & 0x00ff)
 
         self.address_absolute = (high_byte << 8) | low_byte
+        self.address_absolute = self.address_absolute + self.y
 
-        return 0
+        if (self.address_absolute & 0xFF00) != (high_byte << 8):
+            return 1
+        else:
+            return 0
 
     # Instructions
     def and_(self):
@@ -465,6 +464,32 @@ class CPU(object):
         self.set_flag(self.Z, self.accumulator == 0x00)
         self.set_flag(self.N, self.accumulator & 0x80)
         return 1
+
+    def lax(self):
+        self.fetch()
+
+        self.accumulator = self.x = self.fetched
+
+        self.set_flag(self.Z, self.accumulator == 0x00)
+        self.set_flag(self.N, self.accumulator & 0x80)
+
+        return 0
+
+    def sax(self):
+        self.write(self.address_absolute, self.accumulator & self.x)
+        return 0
+
+    def dcp(self):
+        self.fetch()
+        value = np.uint8(self.fetched - 1)
+        self.write(self.address_absolute, value & 0x00FF)
+        self.set_flag(self.Z, (value & 0x00FF) == 0x0000)
+        self.set_flag(self.N, value & 0x0080)
+
+        temp = self.accumulator - value
+        self.set_flag(self.C, self.accumulator >= value)
+        self.set_flag(self.Z, temp & 0x00ff == 0x0000)
+        self.set_flag(self.N, temp & 0x0080)
 
     def sta(self):
         self.write(self.address_absolute, self.accumulator)
@@ -844,6 +869,12 @@ class CPU(object):
         return 0
 
     def nop(self):
+        if self.opcode == 0x80:
+            self.program_counter += 1
+        if self.opcode & 0x4 == 4:
+            self.program_counter += 1
+        if self.opcode & 0xC == 12:
+            self.program_counter += 1
         if self.opcode == 0xFC:
             return 1
         return 0

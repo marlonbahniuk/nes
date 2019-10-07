@@ -9,9 +9,10 @@ class PPU(object):
     def __init__(self):
         self.screen = np.full((256, 240), (20, 255, 100, 100), (int, 4))
         self.pattern_tables = np.full((2, 128, 128), (0, 0, 0, 100), (int, 4))
+        self.name_tables = np.full((2, 1024), 0)
         self.pattern = np.full((2, 4096), 0)
         self.palette_table = palette.palette
-        self.palette =
+        self.palette = np.full(32, 0)
 
     def set_cartridge(self, cartridge):
         self.cartridge = cartridge
@@ -27,26 +28,26 @@ class PPU(object):
         elif 0x2000 <= address <= 0x3EFF:
             address &= 0x0FFF
 
-            if self.cartridge.mirror == Cartridge.MIRROR_VERTICAL:
+            if self.cartridge.mirroring == Cartridge.MIRRORING_VERTICAL:
                 # Vertical
                 if 0x0000 <= address <= 0x03FF:
-                    data = tblName[0][address & 0x03FF]
+                    data = self.name_tables[0][address & 0x03FF]
                 if 0x0400 <= address <= 0x07FF:
-                    data = tblName[1][address & 0x03FF]
+                    data = self.name_tables[1][address & 0x03FF]
                 if 0x0800 <= address <= 0x0BFF:
-                    data = tblName[0][address & 0x03FF]
+                    data = self.name_tables[0][address & 0x03FF]
                 if 0x0C00 <= address <= 0x0FFF:
-                    data = tblName[1][address & 0x03FF]
-            elif self.cartridge.mirror == Cartridge.MIRROR_HORIZONTAL:
+                    data = self.name_tables[1][address & 0x03FF]
+            elif self.cartridge.mirroring == Cartridge.MIRRORING_HORIZONTAL:
                 # Horizontal
                 if 0x0000 <= address <= 0x03FF:
-                    data = tblName[0][address & 0x03FF]
+                    data = self.name_tables[0][address & 0x03FF]
                 if 0x0400 <= address <= 0x07FF:
-                    data = tblName[0][address & 0x03FF]
+                    data = self.name_tables[0][address & 0x03FF]
                 if 0x0800 <= address <= 0x0BFF:
-                    data = tblName[1][address & 0x03FF]
+                    data = self.name_tables[1][address & 0x03FF]
                 if 0x0C00 <= address <= 0x0FFF:
-                    data = tblName[1][address & 0x03FF]
+                    data = self.name_tables[1][address & 0x03FF]
         elif 0x3F00 <= address <= 0x3FFF:
 
             address &= 0x001F

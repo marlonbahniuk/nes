@@ -3,6 +3,9 @@ from mappers import mapper_selector
 
 class Cartridge(object):
 
+    MIRRORING_VERTICAL = 1
+    MIRRORING_HORIZONTAL = 0
+
     def __init__(self, file_path):
         with open(file_path, 'rb') as file_data:
             self.header = file_data.read(16)
