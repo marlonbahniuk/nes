@@ -8,7 +8,6 @@ class Bus(object):
         self.cpu.set_bus(self)
 
         self.ppu = PPU()
-        # self.ppu.set_bus(self)
 
         self.cpu_ram = [0] * 64 * 1024
 
@@ -34,3 +33,4 @@ class Bus(object):
 
     def set_cartridge(self, cartridge):
         self.cartridge = cartridge
+        self.ppu.set_cartridge(cartridge)

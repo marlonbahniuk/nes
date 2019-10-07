@@ -24,11 +24,11 @@ blue = pg.color.Color('blue')
 green = pg.color.Color('green')
 gray = pg.color.Color('gray')
 
-cartridge = Cartridge('nestest.nes')
+cartridge = Cartridge('donkey kong.nes')
 nes.set_cartridge(cartridge)
 nes.cpu.reset()
 
-nes.cpu.program_counter = 0x0c000
+# nes.cpu.program_counter = 0x0c000
 
 code_map = nes.cpu.disassemble(0x0000, 0xffff)
 
@@ -104,7 +104,7 @@ while running:
         for index in range(lower_index, upper_index):
             color = black if index == current_index else gray
 
-            if index >= 0:
+            if index >= 0 and index < len(keys_list) and keys_list[index] < len(code_map):
                 screen.blit(font.render(code_map[keys_list[index]], True, color), (x, y))
 
             y += 12
@@ -130,9 +130,14 @@ while running:
     screen.blit(font.render('Clocks: {}'.format(nes.cpu.clock_count), True, black), (0, 480))
 
     pg.display.set_caption('NES - {:02.0f} fps'.format(clock.get_fps()))
-    pg.display.flip()
 
-    nes.ppu.get_screen()
+    ppu_screen = nes.ppu.get_pattern_table(1, 1)
+
+    for x in range(len(ppu_screen)):
+        for y in range(len(ppu_screen[x])):
+            screen.set_at((x, y), ppu_screen[x][y])
+
+    pg.display.flip()
 
     clock.tick()
 

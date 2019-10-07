@@ -1,6 +1,6 @@
 import numpy as np
 
-nestest_log = open('nestest.log', 'r')
+# nestest_log = open('nestest.log', 'r')
 
 
 class CPU(object):
@@ -108,9 +108,9 @@ class CPU(object):
     def reset(self):
         # Set the initial program counter
         self.address_absolute = 0xfffc
-        _, low_byte = divmod(self.read(self.address_absolute + 0), 0x100)
-        high_byte, _ = divmod(self.read(self.address_absolute + 1), 0x100)
-        self.program_counter = (high_byte << 8) | low_byte
+        low_byte = np.uint8(self.read(self.address_absolute + 0))
+        high_byte = np.uint8(self.read(self.address_absolute + 1))
+        self.program_counter = np.uint16((high_byte << 8) | low_byte)
 
         # Registers
         self.accumulator = 0
@@ -182,21 +182,21 @@ class CPU(object):
 
             self.set_flag(self.U, True)
 
-            log_line = nestest_log.readline()
+            # log_line = nestest_log.readline()
 
             print('{:04X} {:s}'.format(current_pc, instruction_data[1]))
 
-            log_pc = int(log_line[0:4], 16)
-            log_instruction = log_line[16:19]
-            log_a = int(log_line[50:52], 16)
-            log_x = int(log_line[55:57], 16)
-            log_y = int(log_line[60:62], 16)
-            log_p = int(log_line[65:67], 16)
-            log_sp = int(log_line[71:73], 16)
+            # log_pc = int(log_line[0:4], 16)
+            # log_instruction = log_line[16:19]
+            # log_a = int(log_line[50:52], 16)
+            # log_x = int(log_line[55:57], 16)
+            # log_y = int(log_line[60:62], 16)
+            # log_p = int(log_line[65:67], 16)
+            # log_sp = int(log_line[71:73], 16)
 #C000  4C F5 C5  JMP $C5F5                       A:00 X:00 Y:00 P:24 SP:FD CYC:  0 SL:241
 
-            if current_a != log_a or current_x != log_x or current_y != log_y or current_pc != log_pc or current_sp != log_sp or current_status != log_p:
-                print('something went wrong')
+            # if current_a != log_a or current_x != log_x or current_y != log_y or current_pc != log_pc or current_sp != log_sp or current_status != log_p:
+            #     print('something went wrong')
 
 
         self.clock_count += 1
